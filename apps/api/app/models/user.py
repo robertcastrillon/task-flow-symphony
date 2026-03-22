@@ -50,6 +50,3 @@ class User(Base):
     comments: Mapped[list["Comment"]] = relationship(  # noqa: F821
         back_populates="author"
     )
-
-    def __repr__(self) -> str:
-        return f"<User {self.email}>"

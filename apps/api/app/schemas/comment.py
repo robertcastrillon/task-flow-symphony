@@ -9,11 +9,11 @@ class CommentCreate(BaseModel):
 
 
 class CommentResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
     id: uuid.UUID
-    content: str
     task_id: uuid.UUID
     author_id: uuid.UUID
+    content: str
     created_at: datetime
     updated_at: datetime
-
-    model_config = {"from_attributes": True}

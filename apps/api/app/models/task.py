@@ -72,6 +72,3 @@ class Task(Base):
     comments: Mapped[list["Comment"]] = relationship(  # noqa: F821
         back_populates="task", cascade="all, delete-orphan"
     )
-
-    def __repr__(self) -> str:
-        return f"<Task {self.title}>"

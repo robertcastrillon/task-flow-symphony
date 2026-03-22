@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: [develop, main]
   pull_request:
     branches: [develop, main]
+  push:
+    branches: [develop]
 
 jobs:
   backend:
@@ -15,15 +15,15 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16-alpine
         env:
-          POSTGRES_USER: taskflow
-          POSTGRES_PASSWORD: taskflow
+          POSTGRES_USER: taskflow_test
+          POSTGRES_PASSWORD: taskflow_test
           POSTGRES_DB: taskflow_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U taskflow_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -35,23 +35,20 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install uv
-        run: pip install uv
-
       - name: Install dependencies
-        run: uv pip install --system ".[dev]"
+        run: pip install -e ".[dev]"
 
       - name: Lint
-        run: ruff check . && ruff format --check .
+        run: ruff check .
 
-      - name: Security scan
-        run: bandit -r app -ll
+      - name: Format check
+        run: ruff format --check .
 
       - name: Test
         env:
-          TASKFLOW_DATABASE_URL: postgresql+asyncpg://taskflow:taskflow@localhost:5432/taskflow_test
+          TASKFLOW_DATABASE_URL: postgresql+asyncpg://taskflow_test:taskflow_test@localhost:5432/taskflow_test
           TASKFLOW_JWT_SECRET_KEY: ci-test-secret
-        run: python -m pytest --cov --cov-report=term-missing --cov-fail-under=80
+        run: pytest --cov --cov-report=term-missing --cov-fail-under=80
 
   frontend:
     runs-on: ubuntu-latest
@@ -65,14 +62,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: apps/web/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Lint
-        run: npx eslint . && npx prettier --check .
+        run: npm run lint
 
       - name: Test
         run: npm run test

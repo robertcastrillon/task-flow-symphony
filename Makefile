@@ -1,4 +1,4 @@
-.PHONY: dev down test lint format migrate migration clean
+.PHONY: dev test lint format
 
 dev:
 	docker compose up -d
@@ -23,12 +23,3 @@ migrate:
 
 migration:
 	cd apps/api && alembic revision --autogenerate -m "$(msg)"
-
-test-docker:
-	docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
-
-clean:
-	docker compose down -v
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
-	find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true

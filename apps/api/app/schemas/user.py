@@ -17,17 +17,16 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
-    avatar_url: str | None = Field(None, max_length=500)
+    avatar_url: str | None = None
 
 
 class UserResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
     id: uuid.UUID
-    email: EmailStr
+    email: str
     name: str
-    avatar_url: str | None = None
+    avatar_url: str | None
     role: UserRole
-    telegram_chat_id: str | None = None
     is_active: bool
     created_at: datetime
-
-    model_config = {"from_attributes": True}

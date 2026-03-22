@@ -33,6 +33,3 @@ class Comment(Base):
 
     task: Mapped["Task"] = relationship(back_populates="comments")  # noqa: F821
     author: Mapped["User"] = relationship(back_populates="comments")  # noqa: F821
-
-    def __repr__(self) -> str:
-        return f"<Comment {self.id}>"
