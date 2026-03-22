@@ -149,8 +149,22 @@ class TaskService:
         payload: TaskAssign,
         current_user: User,
     ) -> Task:
-        """Find task, validate assignee exists, update assigned_to."""
+        """Find task, validate permissions and assignee, update assigned_to.
+
+        Members can only assign tasks to themselves. Admins can assign freely.
+        """
         task = await TaskService.get_task(db, task_id)
+
+        # Members can only self-assign; admins can assign to anyone
+        if (
+            payload.assigned_to is not None
+            and payload.assigned_to != current_user.id
+            and current_user.role != "admin"
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Members can only assign tasks to themselves",
+            )
 
         if payload.assigned_to is not None:
             result = await db.execute(

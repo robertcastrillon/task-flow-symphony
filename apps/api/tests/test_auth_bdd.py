@@ -470,6 +470,97 @@ class TestUSF01RoleAuthorization:
         assert response.json()["title"] == "Admin Updated"
 
     @pytest.mark.asyncio
+    async def test_member_cannot_assign_task_to_other_user(self, client, db_session):
+        """Scenario: Miembro intenta asignar tarea a otro usuario — returns 403."""
+        owner = await _create_user(db_session, email="owner3@team.com", name="Owner")
+        other = await _create_user(db_session, email="other@team.com", name="Other")
+        task = await _create_task_via_api(client, owner)
+        response = await client.patch(
+            f"/api/v1/tasks/{task['id']}/assign",
+            json={"assigned_to": str(other.id)},
+            headers=_auth_headers(owner),
+        )
+        assert response.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_admin_can_assign_task_to_any_user(self, client, db_session):
+        """Scenario: Admin — asignación libre de tareas."""
+        admin = await _create_user(db_session, email="admin3@team.com", role="admin")
+        member = await _create_user(db_session, email="member4@team.com", name="Member")
+        task = await _create_task_via_api(client, admin)
+        response = await client.patch(
+            f"/api/v1/tasks/{task['id']}/assign",
+            json={"assigned_to": str(member.id)},
+            headers=_auth_headers(admin),
+        )
+        assert response.status_code == 200
+        assert response.json()["assigned_to"] == str(member.id)
+
+    @pytest.mark.asyncio
+    async def test_member_can_assign_task_to_self(self, client, db_session):
+        """Scenario: Member can self-assign a task."""
+        member = await _create_user(
+            db_session, email="self_assign@team.com", name="Self"
+        )
+        task = await _create_task_via_api(client, member)
+        response = await client.patch(
+            f"/api/v1/tasks/{task['id']}/assign",
+            json={"assigned_to": str(member.id)},
+            headers=_auth_headers(member),
+        )
+        assert response.status_code == 200
+        assert response.json()["assigned_to"] == str(member.id)
+
+    @pytest.mark.asyncio
+    async def test_admin_can_list_team_members(self, client, db_session):
+        """Scenario: Admin accede a gestión de equipo — list users."""
+        admin = await _create_user(db_session, email="admin4@team.com", role="admin")
+        await _create_user(db_session, email="team1@team.com", name="Team1")
+        response = await client.get(
+            "/api/v1/users",
+            headers=_auth_headers(admin),
+        )
+        assert response.status_code == 200
+        assert len(response.json()) >= 2
+
+    @pytest.mark.asyncio
+    async def test_admin_can_get_user_detail(self, client, db_session):
+        """Scenario: Admin accede a gestión de equipo — view user detail."""
+        admin = await _create_user(db_session, email="admin5@team.com", role="admin")
+        member = await _create_user(db_session, email="team2@team.com", name="Team2")
+        response = await client.get(
+            f"/api/v1/users/{member.id}",
+            headers=_auth_headers(admin),
+        )
+        assert response.status_code == 200
+        assert response.json()["email"] == "team2@team.com"
+
+    @pytest.mark.asyncio
+    async def test_admin_can_update_any_user(self, client, db_session):
+        """Scenario: Admin accede a gestión de equipo — update user profile."""
+        admin = await _create_user(db_session, email="admin6@team.com", role="admin")
+        member = await _create_user(db_session, email="team3@team.com", name="Team3")
+        response = await client.patch(
+            f"/api/v1/users/{member.id}",
+            json={"name": "Updated Name"},
+            headers=_auth_headers(admin),
+        )
+        assert response.status_code == 200
+        assert response.json()["name"] == "Updated Name"
+
+    @pytest.mark.asyncio
+    async def test_member_cannot_update_other_user(self, client, db_session):
+        """Scenario: Member cannot update another member's profile."""
+        member1 = await _create_user(db_session, email="m1@team.com", name="M1")
+        member2 = await _create_user(db_session, email="m2@team.com", name="M2")
+        response = await client.patch(
+            f"/api/v1/users/{member2.id}",
+            json={"name": "Hacked"},
+            headers=_auth_headers(member1),
+        )
+        assert response.status_code == 403
+
+    @pytest.mark.asyncio
     async def test_rate_limiting_on_register(self, client):
         """Rate limiting also applies to register endpoint."""
         for i in range(5):

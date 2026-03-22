@@ -373,10 +373,10 @@ class TestTaskServiceChangeStatus:
 
 class TestTaskServiceAssign:
     @pytest.mark.asyncio
-    async def test_assign_to_existing_user(self):
-        user = _make_user()
+    async def test_admin_assign_to_existing_user(self):
+        admin = _make_user(role="admin")
         assignee = _make_user()
-        task = _make_task(created_by=user.id)
+        task = _make_task(created_by=admin.id)
 
         db = AsyncMock()
         task_result = MagicMock()
@@ -386,13 +386,44 @@ class TestTaskServiceAssign:
         db.execute.side_effect = [task_result, assignee_result]
 
         payload = TaskAssign(assigned_to=assignee.id)
-        result = await TaskService.assign_task(db, task.id, payload, user)
+        result = await TaskService.assign_task(db, task.id, payload, admin)
         assert result.assigned_to == assignee.id
 
     @pytest.mark.asyncio
-    async def test_assign_to_nonexistent_user_raises_404(self):
-        user = _make_user()
-        task = _make_task(created_by=user.id)
+    async def test_member_assign_to_other_raises_403(self):
+        member = _make_user()
+        task = _make_task(created_by=member.id)
+
+        db = AsyncMock()
+        task_result = MagicMock()
+        task_result.scalar_one_or_none.return_value = task
+        db.execute.side_effect = [task_result]
+
+        payload = TaskAssign(assigned_to=uuid.uuid4())
+        with pytest.raises(HTTPException) as exc_info:
+            await TaskService.assign_task(db, task.id, payload, member)
+        assert exc_info.value.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_member_self_assign_succeeds(self):
+        member = _make_user()
+        task = _make_task(created_by=member.id)
+
+        db = AsyncMock()
+        task_result = MagicMock()
+        task_result.scalar_one_or_none.return_value = task
+        assignee_result = MagicMock()
+        assignee_result.scalar_one_or_none.return_value = member
+        db.execute.side_effect = [task_result, assignee_result]
+
+        payload = TaskAssign(assigned_to=member.id)
+        result = await TaskService.assign_task(db, task.id, payload, member)
+        assert result.assigned_to == member.id
+
+    @pytest.mark.asyncio
+    async def test_admin_assign_to_nonexistent_user_raises_404(self):
+        admin = _make_user(role="admin")
+        task = _make_task(created_by=admin.id)
 
         db = AsyncMock()
         task_result = MagicMock()
@@ -403,7 +434,7 @@ class TestTaskServiceAssign:
 
         payload = TaskAssign(assigned_to=uuid.uuid4())
         with pytest.raises(HTTPException) as exc_info:
-            await TaskService.assign_task(db, task.id, payload, user)
+            await TaskService.assign_task(db, task.id, payload, admin)
         assert exc_info.value.status_code == 404
         assert "Assignee not found" in exc_info.value.detail
 
