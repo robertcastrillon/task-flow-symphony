@@ -178,7 +178,9 @@ class TestTaskSchemas:
         assert resp.completed_at is None
 
     def test_paginated_response(self):
-        paginated = PaginatedTaskResponse(items=[], total=0, page=1, size=20, pages=0)
+        paginated = PaginatedTaskResponse(
+            items=[], total=0, page=1, size=20, pages=0
+        )
         assert paginated.total == 0
         assert paginated.items == []
 
