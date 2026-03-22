@@ -3,20 +3,30 @@ from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.models.user import UserRole
 
-class UserResponse(BaseModel):
-    id: uuid.UUID
+
+class UserBase(BaseModel):
     email: EmailStr
-    name: str
-    avatar_url: str | None = None
-    role: str
-    telegram_chat_id: str | None = None
-    is_active: bool
-    created_at: datetime
+    name: str = Field(min_length=1, max_length=255)
 
-    model_config = {"from_attributes": True}
+
+class UserCreate(UserBase):
+    password: str = Field(min_length=8, max_length=128)
 
 
 class UserUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
-    avatar_url: str | None = Field(None, max_length=500)
+    avatar_url: str | None = None
+
+
+class UserResponse(BaseModel):
+    model_config = {"from_attributes": True}
+
+    id: uuid.UUID
+    email: str
+    name: str
+    avatar_url: str | None
+    role: UserRole
+    is_active: bool
+    created_at: datetime

@@ -1,18 +1,17 @@
-from __future__ import annotations
-
+import enum
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, Enum, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-if TYPE_CHECKING:
-    from app.models.comment import Comment
-    from app.models.task import Task
+
+class UserRole(enum.StrEnum):
+    admin = "admin"
+    member = "member"
 
 
 class User(Base):
@@ -24,13 +23,13 @@ class User(Base):
     email: Mapped[str] = mapped_column(
         String(255), unique=True, nullable=False, index=True
     )
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    role: Mapped[str] = mapped_column(String(20), nullable=False, default="member")
-    telegram_chat_id: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, unique=True
+    avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole), nullable=False, default=UserRole.member
     )
+    telegram_chat_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -42,18 +41,12 @@ class User(Base):
         onupdate=func.now(),
     )
 
-    created_tasks: Mapped[list[Task]] = relationship(
-        "Task",
-        back_populates="creator",
-        foreign_keys="Task.created_by",
+    created_tasks: Mapped[list["Task"]] = relationship(  # noqa: F821
+        back_populates="creator", foreign_keys="Task.created_by"
     )
-    assigned_tasks: Mapped[list[Task]] = relationship(
-        "Task",
-        back_populates="assignee",
-        foreign_keys="Task.assigned_to",
+    assigned_tasks: Mapped[list["Task"]] = relationship(  # noqa: F821
+        back_populates="assignee", foreign_keys="Task.assigned_to"
     )
-    comments: Mapped[list[Comment]] = relationship("Comment", back_populates="author")
-
-    def __repr__(self) -> str:
-        email = self.__dict__.get("email", "?")
-        return f"<User {email}>"
+    comments: Mapped[list["Comment"]] = relationship(  # noqa: F821
+        back_populates="author"
+    )
