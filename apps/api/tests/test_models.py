@@ -91,9 +91,7 @@ class TestTaskModel:
         created_by = Task.__table__.columns["created_by"]
         assigned_to = Task.__table__.columns["assigned_to"]
         assert any(fk.target_fullname == "users.id" for fk in created_by.foreign_keys)
-        assert any(
-            fk.target_fullname == "users.id" for fk in assigned_to.foreign_keys
-        )
+        assert any(fk.target_fullname == "users.id" for fk in assigned_to.foreign_keys)
 
     def test_task_soft_delete_default(self):
         is_deleted_col = Task.__table__.columns["is_deleted"]
