@@ -1,3 +1,6 @@
+import uuid
+
+from app.db.base import Base
 from app.models.comment import Comment
 from app.models.task import Task, TaskPriority, TaskStatus
 from app.models.user import User, UserRole
@@ -43,6 +46,11 @@ class TestUserModel:
         is_active_col = User.__table__.columns["is_active"]
         assert is_active_col.default.arg is True
 
+    def test_user_repr(self):
+        user = User.__new__(User)
+        user.__dict__["email"] = "test@example.com"
+        assert repr(user) == "<User test@example.com>"
+
 
 class TestTaskModel:
     def test_task_table_name(self):
@@ -83,7 +91,9 @@ class TestTaskModel:
         created_by = Task.__table__.columns["created_by"]
         assigned_to = Task.__table__.columns["assigned_to"]
         assert any(fk.target_fullname == "users.id" for fk in created_by.foreign_keys)
-        assert any(fk.target_fullname == "users.id" for fk in assigned_to.foreign_keys)
+        assert any(
+            fk.target_fullname == "users.id" for fk in assigned_to.foreign_keys
+        )
 
     def test_task_soft_delete_default(self):
         is_deleted_col = Task.__table__.columns["is_deleted"]
@@ -96,6 +106,23 @@ class TestTaskModel:
     def test_task_assigned_to_nullable(self):
         assigned_to = Task.__table__.columns["assigned_to"]
         assert assigned_to.nullable is True
+
+    def test_task_status_indexed(self):
+        status_col = Task.__table__.columns["status"]
+        assert status_col.index is True
+
+    def test_task_priority_indexed(self):
+        priority_col = Task.__table__.columns["priority"]
+        assert priority_col.index is True
+
+    def test_task_is_deleted_indexed(self):
+        col = Task.__table__.columns["is_deleted"]
+        assert col.index is True
+
+    def test_task_repr(self):
+        task = Task.__new__(Task)
+        task.__dict__["title"] = "Test task"
+        assert repr(task) == "<Task Test task>"
 
 
 class TestCommentModel:
@@ -127,3 +154,17 @@ class TestCommentModel:
     def test_comment_content_not_nullable(self):
         content = Comment.__table__.columns["content"]
         assert content.nullable is False
+
+    def test_comment_repr(self):
+        comment = Comment.__new__(Comment)
+        test_id = uuid.uuid4()
+        comment.__dict__["id"] = test_id
+        assert repr(comment) == f"<Comment {test_id}>"
+
+
+class TestModelsRegistered:
+    def test_all_models_registered_in_base(self):
+        table_names = set(Base.metadata.tables.keys())
+        assert "users" in table_names
+        assert "tasks" in table_names
+        assert "comments" in table_names

@@ -5,14 +5,14 @@ from app.core.config import settings
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(
+    application = FastAPI(
         title=settings.app_name,
         version=settings.version,
         docs_url="/api/v1/docs",
         openapi_url="/api/v1/openapi.json",
     )
 
-    app.add_middleware(
+    application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
@@ -20,15 +20,19 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    @app.get("/api/v1/health")
-    async def health_check() -> dict[str, str]:
-        return {
-            "status": "healthy",
-            "app_name": settings.app_name,
-            "version": settings.version,
-        }
+    from app.routers import auth, comments, dashboard, tasks, users
 
-    return app
+    application.include_router(auth.router)
+    application.include_router(users.router)
+    application.include_router(tasks.router)
+    application.include_router(comments.router)
+    application.include_router(dashboard.router)
+
+    @application.get("/api/v1/health")
+    async def health_check() -> dict[str, str]:
+        return {"status": "ok", "version": settings.version}
+
+    return application
 
 
 app = create_app()
