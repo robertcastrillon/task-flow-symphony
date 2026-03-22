@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from app.db.session import Base, async_session_factory, engine
+from app.db.base import Base
+from app.db.session import async_session_factory, engine
 
 
 def test_engine_is_async():
