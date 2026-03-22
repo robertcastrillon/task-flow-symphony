@@ -46,22 +46,6 @@ async_session_test = async_sessionmaker(
 )
 
 
-# TypeDecorator so SQLAlchemy properly converts UUID <-> str for SQLite
-class SQLiteUUID(TypeDecorator):
-    impl = String(36)
-    cache_ok = True
-
-    def process_bind_param(self, value, dialect):
-        if value is not None:
-            return str(value)
-        return value
-
-    def process_result_value(self, value, dialect):
-        if value is not None:
-            return uuid.UUID(value)
-        return value
-
-
 # Patch PG-specific column types for SQLite compatibility
 for table in Base.metadata.tables.values():
     for column in table.columns:

@@ -242,25 +242,53 @@ class TestChangeStatus:
 class TestAssignTask:
     @pytest.mark.asyncio
     async def test_assign_task_to_user(self, client, db_session):
-        user = await _create_user(db_session, email="creator@example.com")
+        """Admin can assign tasks to any user."""
+        admin = await _create_user(db_session, email="admin@example.com", role="admin")
         assignee = await _create_user(db_session, email="assignee@example.com")
-        task = await _create_task(db_session, user.id)
+        task = await _create_task(db_session, admin.id)
         response = await client.patch(
             f"/api/v1/tasks/{task.id}/assign",
             json={"assigned_to": str(assignee.id)},
-            headers=_auth_header(user),
+            headers=_auth_header(admin),
         )
         assert response.status_code == 200
         assert response.json()["assigned_to"] == str(assignee.id)
 
     @pytest.mark.asyncio
+    async def test_member_self_assign(self, client, db_session):
+        """Members can assign tasks to themselves."""
+        creator = await _create_user(db_session, email="creator@example.com")
+        member = await _create_user(db_session, email="member@example.com")
+        task = await _create_task(db_session, creator.id)
+        response = await client.patch(
+            f"/api/v1/tasks/{task.id}/assign",
+            json={"assigned_to": str(member.id)},
+            headers=_auth_header(member),
+        )
+        assert response.status_code == 200
+        assert response.json()["assigned_to"] == str(member.id)
+
+    @pytest.mark.asyncio
+    async def test_member_cannot_assign_to_other(self, client, db_session):
+        """Members cannot assign tasks to other users."""
+        creator = await _create_user(db_session, email="creator@example.com")
+        other = await _create_user(db_session, email="other@example.com")
+        task = await _create_task(db_session, creator.id)
+        response = await client.patch(
+            f"/api/v1/tasks/{task.id}/assign",
+            json={"assigned_to": str(other.id)},
+            headers=_auth_header(creator),
+        )
+        assert response.status_code == 403
+
+    @pytest.mark.asyncio
     async def test_assign_to_nonexistent_user(self, client, db_session):
-        user = await _create_user(db_session)
-        task = await _create_task(db_session, user.id)
+        admin = await _create_user(db_session, role="admin")
+        task = await _create_task(db_session, admin.id)
         response = await client.patch(
             f"/api/v1/tasks/{task.id}/assign",
             json={"assigned_to": str(uuid.uuid4())},
-            headers=_auth_header(user),
+            headers=_auth_header(admin),
         )
         assert response.status_code == 404
 
