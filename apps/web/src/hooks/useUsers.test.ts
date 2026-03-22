@@ -14,7 +14,7 @@ vi.mock("../services/api", () => ({
 
 import api from "../services/api";
 
-const mockedApi = vi.mocked(api);
+const mockedApi = vi.mocked(api, { deep: true });
 
 const mockUser: User = {
   id: "user-1",
