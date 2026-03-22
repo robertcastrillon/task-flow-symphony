@@ -24,6 +24,8 @@ async def list_tasks(
     assignee: uuid.UUID | None = None,
     priority: str | None = None,
     tag: str | None = None,
+    search: str | None = None,
+    sort_by: str | None = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=50),
     db: AsyncSession = Depends(get_db),
@@ -36,6 +38,8 @@ async def list_tasks(
         assignee=assignee,
         priority=priority,
         tag=tag,
+        search=search,
+        sort_by=sort_by,
         page=page,
         size=size,
     )
