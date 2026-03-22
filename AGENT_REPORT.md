@@ -1,30 +1,47 @@
-## Agent Report — ENG-80: B—CD-01: Database models, schemas & project scaffolding
+## Quality Check Report — ENG-80: B—CD-01: Database models, schemas & project scaffolding
 
-**Mode:** Implementation
+NEXT_STATE: Ready to Deploy
+
 **Branch:** `eng-80`
 **PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/12
+**Routes to:** Ready to Deploy (no UI to validate — test evidence below)
 
-### What was implemented
+### Test pyramid results
 
-All Comments & Dashboard module scaffolding was already built in B—TU-02 (ENG-77). This ticket verified completeness and all quality gates:
+| Level | Check | Result |
+|-------|-------|--------|
+| 1 | Lint (ruff check) | All checks passed |
+| 1 | Format (ruff format) | 57 files already formatted |
+| 1 | Security (bandit) | No issues found |
+| 1 | Secrets detection | No hardcoded secrets found |
+| 2 | Unit tests | 245 passed, 0 failed |
+| 2 | Coverage | 97% (threshold: 80%) |
+| 3 | Integration tests | No integration tests yet (scaffolding ticket) |
+| 4 | BDD scenarios | No BDD tests yet (scaffolding ticket) |
+| 5-6 | E2E + Smoke | N/A — non-UI ticket |
 
-- **Comment Model** (`app/models/comment.py`): SQLAlchemy ORM with UUID PK, content (Text), task_id FK, author_id FK, timestamps with timezone
-- **Comment Schemas** (`app/schemas/comment.py`): `CommentCreate` (min_length=1 validation), `CommentResponse` (from_attributes ORM mapping)
-- **Dashboard Schemas** (`app/schemas/dashboard.py`): `TaskCountByStatus`, `TaskCountByUser`, `DashboardStats` with aggregation fields
-- **Comment Service** (`app/services/comment_service.py`): `list_comments` (task existence check, ordered by created_at), `create_comment` (task validation, flush/refresh pattern)
-- **Dashboard Service** (`app/services/dashboard_service.py`): `get_stats` aggregating total tasks, by status, by priority, overdue count, and per-user counts
-- **Comments Router** (`app/routers/comments.py`): `GET/POST /api/v1/tasks/{id}/comments` with auth protection
-- **Dashboard Router** (`app/routers/dashboard.py`): `GET /api/v1/dashboard/stats` with auth protection
-- **Alembic Migration** (`alembic/versions/001_initial_schema.py`): Creates users, tasks, comments tables with proper FKs, indexes, and reversible downgrade
+### Coverage breakdown
 
-### Quality results
+| Module | Coverage |
+|--------|----------|
+| models/ | 100% |
+| schemas/ | 100% |
+| services/ | 96-100% |
+| routers/ | 85-100% |
+| core/ | 96-100% |
+| db/ | 100% |
+| **TOTAL** | **97%** |
 
-| Check | Result |
-|-------|--------|
-| Unit tests | 245 passed |
-| Coverage | 97% (75% required) |
-| Lint (ruff) | All checks passed |
-| Format (ruff) | 57 files already formatted |
+### QA sign-off (automated)
+
+This ticket contains no user-facing UI. All validation is automated:
+- Tests passing: 245/245 green
+- Coverage meets threshold: 97% (80% required)
+- No security findings (bandit clean)
+- No hardcoded secrets
+- Lint and format clean
+
+No human UI review needed. Ready to merge.
 
 ### Definition of Done
 
@@ -33,5 +50,5 @@ All Comments & Dashboard module scaffolding was already built in B—TU-02 (ENG-
 - [x] Base project structure in place
 - [x] Lint + format passing
 
-### Next step
-Quality Check agent will run the full test pyramid and deploy locally.
+### Issues found during QA
+None — all checks passed on first run.
