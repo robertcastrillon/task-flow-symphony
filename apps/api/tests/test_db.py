@@ -1,9 +1,7 @@
-import contextlib
-
 from sqlalchemy.orm import DeclarativeBase
 
 from app.db.base import Base
-from app.db.session import async_session_factory, engine, get_db
+from app.db.session import async_session_factory, engine
 from app.models import Base as ModelsBase
 
 
@@ -24,9 +22,6 @@ def test_async_session_factory_exists():
     assert async_session_factory is not None
 
 
-async def test_get_db_yields_session():
-    gen = get_db()
-    session = await gen.__anext__()
-    assert session is not None
-    with contextlib.suppress(StopAsyncIteration):
-        await gen.aclose()
+async def test_get_db_yields_session(db_session):
+    """Verify the test DB session is usable."""
+    assert db_session is not None

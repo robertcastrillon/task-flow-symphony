@@ -65,12 +65,20 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     """Simple in-memory rate limiting for auth endpoints."""
 
     AUTH_PATHS = {"/api/v1/auth/register", "/api/v1/auth/login"}
+    _instances: list["RateLimitMiddleware"] = []
 
     def __init__(self, app, max_requests: int | None = None):
         super().__init__(app)
         self.max_requests = max_requests or settings.rate_limit_auth
         self.window_seconds = 60
         self._requests: dict[str, list[float]] = defaultdict(list)
+        RateLimitMiddleware._instances.append(self)
+
+    @classmethod
+    def reset_all(cls) -> None:
+        """Clear rate limit state on all instances (useful for tests)."""
+        for instance in cls._instances:
+            instance._requests.clear()
 
     async def dispatch(
         self, request: Request, call_next: RequestResponseEndpoint
