@@ -22,9 +22,7 @@ async def list_comments(
     return [CommentResponse.model_validate(c) for c in comments]
 
 
-@router.post(
-    "/{task_id}/comments", response_model=CommentResponse, status_code=201
-)
+@router.post("/{task_id}/comments", response_model=CommentResponse, status_code=201)
 async def create_comment(
     task_id: uuid.UUID,
     payload: CommentCreate,
@@ -32,7 +30,5 @@ async def create_comment(
     current_user: User = Depends(get_current_user),
 ) -> CommentResponse:
     """Add a comment to a task."""
-    comment = await CommentService.create_comment(
-        db, task_id, payload, current_user
-    )
+    comment = await CommentService.create_comment(db, task_id, payload, current_user)
     return CommentResponse.model_validate(comment)

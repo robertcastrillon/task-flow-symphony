@@ -45,8 +45,7 @@ class DashboardService:
         # Overdue tasks
         now = datetime.now(tz=UTC)
         overdue_result = await db.execute(
-            select(func.count())
-            .where(
+            select(func.count()).where(
                 Task.is_deleted.is_(False),
                 Task.due_date < now,
                 Task.status.notin_(["done", "cancelled"]),

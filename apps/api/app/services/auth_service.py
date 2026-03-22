@@ -18,9 +18,7 @@ class AuthService:
     @staticmethod
     async def register_user(db: AsyncSession, payload: RegisterRequest) -> User:
         """Validate email uniqueness, hash password, create User."""
-        result = await db.execute(
-            select(User).where(User.email == payload.email)
-        )
+        result = await db.execute(select(User).where(User.email == payload.email))
         if result.scalar_one_or_none() is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -40,9 +38,7 @@ class AuthService:
     @staticmethod
     async def authenticate(db: AsyncSession, payload: LoginRequest) -> TokenResponse:
         """Find user by email, verify password, generate token pair."""
-        result = await db.execute(
-            select(User).where(User.email == payload.email)
-        )
+        result = await db.execute(select(User).where(User.email == payload.email))
         user = result.scalar_one_or_none()
 
         if user is None or not verify_password(payload.password, user.password_hash):

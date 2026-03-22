@@ -47,9 +47,7 @@ class TaskService:
         total = (await db.execute(count_query)).scalar() or 0
 
         query = (
-            query.offset((page - 1) * size)
-            .limit(size)
-            .order_by(Task.created_at.desc())
+            query.offset((page - 1) * size).limit(size).order_by(Task.created_at.desc())
         )
         result = await db.execute(query)
         items = [TaskResponse.model_validate(t) for t in result.scalars().all()]
