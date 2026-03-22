@@ -1,15 +1,3 @@
-from collections.abc import AsyncGenerator
+from app.db.session import get_db
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.session import async_session_factory
-
-
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session_factory() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            await session.rollback()
-            raise
+__all__ = ["get_db"]
