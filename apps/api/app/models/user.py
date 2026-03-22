@@ -29,9 +29,7 @@ class User(Base):
     role: Mapped[UserRole] = mapped_column(
         Enum(UserRole), nullable=False, default=UserRole.member
     )
-    telegram_chat_id: Mapped[str | None] = mapped_column(
-        String(255), nullable=True, unique=True
-    )
+    telegram_chat_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
@@ -52,7 +50,3 @@ class User(Base):
     comments: Mapped[list["Comment"]] = relationship(  # noqa: F821
         back_populates="author"
     )
-
-    def __repr__(self) -> str:
-        email = self.__dict__.get("email", "?")
-        return f"<User {email}>"

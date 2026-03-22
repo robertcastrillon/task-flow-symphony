@@ -24,5 +24,6 @@ describe("App", () => {
   it("renders login page by default when not authenticated", () => {
     render(<App />);
     expect(screen.getByText("TaskFlow")).toBeInTheDocument();
+    expect(screen.getByText("Iniciar sesión")).toBeInTheDocument();
   });
 });

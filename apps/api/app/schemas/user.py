@@ -17,7 +17,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
-    avatar_url: str | None = Field(None, max_length=512)
+    avatar_url: str | None = None
 
 
 class UserResponse(BaseModel):
@@ -26,8 +26,7 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     email: str
     name: str
-    avatar_url: str | None = None
+    avatar_url: str | None
     role: UserRole
-    telegram_chat_id: str | None = None
     is_active: bool
     created_at: datetime

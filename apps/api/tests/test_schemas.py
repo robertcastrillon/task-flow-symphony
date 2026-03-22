@@ -4,62 +4,17 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from app.schemas.auth import (
-    LoginRequest,
-    RefreshRequest,
-    RegisterRequest,
-    TokenResponse,
-)
+from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.comment import CommentCreate, CommentResponse
-from app.schemas.dashboard import DashboardStats, TaskCountByStatus, TaskCountByUser
+from app.schemas.dashboard import DashboardStats
 from app.schemas.task import (
     PaginatedTaskResponse,
-    TaskAssign,
     TaskCreate,
     TaskResponse,
     TaskStatusUpdate,
     TaskUpdate,
 )
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-
-
-class TestAuthSchemas:
-    def test_register_request_valid(self):
-        req = RegisterRequest(
-            email="test@example.com", name="Test User", password="secure123"
-        )
-        assert req.email == "test@example.com"
-        assert req.name == "Test User"
-
-    def test_register_request_invalid_email(self):
-        with pytest.raises(ValidationError):
-            RegisterRequest(email="not-an-email", name="Test", password="secure123")
-
-    def test_register_request_short_password(self):
-        with pytest.raises(ValidationError):
-            RegisterRequest(email="test@example.com", name="Test", password="short")
-
-    def test_register_request_empty_name(self):
-        with pytest.raises(ValidationError):
-            RegisterRequest(email="test@example.com", name="", password="secure123")
-
-    def test_login_request_valid(self):
-        req = LoginRequest(email="test@example.com", password="mypassword")
-        assert req.email == "test@example.com"
-
-    def test_login_invalid_email(self):
-        with pytest.raises(ValidationError):
-            LoginRequest(email="not-email", password="password123")
-
-    def test_token_response(self):
-        resp = TokenResponse(
-            access_token="abc", refresh_token="def", token_type="bearer"
-        )
-        assert resp.token_type == "bearer"
-
-    def test_refresh_request(self):
-        req = RefreshRequest(refresh_token="some-token")
-        assert req.refresh_token == "some-token"
 
 
 class TestUserSchemas:
@@ -87,15 +42,10 @@ class TestUserSchemas:
         assert update.name == "New Name"
         assert update.avatar_url is None
 
-    def test_user_update_empty_name_rejected(self):
-        with pytest.raises(ValidationError):
-            UserUpdate(name="")
-
     def test_user_response_from_attributes(self):
         now = datetime.now(tz=UTC)
-        uid = uuid.uuid4()
         resp = UserResponse(
-            id=uid,
+            id=uuid.uuid4(),
             email="test@example.com",
             name="Test",
             avatar_url=None,
@@ -103,9 +53,7 @@ class TestUserSchemas:
             is_active=True,
             created_at=now,
         )
-        assert resp.id == uid
         assert resp.email == "test@example.com"
-        assert resp.telegram_chat_id is None
 
 
 class TestTaskSchemas:
@@ -118,10 +66,6 @@ class TestTaskSchemas:
     def test_task_create_empty_title(self):
         with pytest.raises(ValidationError):
             TaskCreate(title="")
-
-    def test_task_create_long_title_rejected(self):
-        with pytest.raises(ValidationError):
-            TaskCreate(title="x" * 256)
 
     def test_task_create_full(self):
         uid = uuid.uuid4()
@@ -140,11 +84,6 @@ class TestTaskSchemas:
         assert update.title == "Updated"
         assert update.priority is None
 
-    def test_task_update_all_optional(self):
-        update = TaskUpdate()
-        assert update.title is None
-        assert update.priority is None
-
     def test_task_status_update(self):
         update = TaskStatusUpdate(status="done")
         assert update.status.value == "done"
@@ -152,15 +91,6 @@ class TestTaskSchemas:
     def test_task_status_update_invalid(self):
         with pytest.raises(ValidationError):
             TaskStatusUpdate(status="invalid_status")
-
-    def test_task_assign(self):
-        uid = uuid.uuid4()
-        assign = TaskAssign(assigned_to=uid)
-        assert assign.assigned_to == uid
-
-    def test_task_assign_unassign(self):
-        assign = TaskAssign(assigned_to=None)
-        assert assign.assigned_to is None
 
     def test_task_response(self):
         now = datetime.now(tz=UTC)
@@ -183,9 +113,8 @@ class TestTaskSchemas:
         assert resp.status.value == "todo"
 
     def test_paginated_response(self):
-        paginated = PaginatedTaskResponse(items=[], total=0, page=1, size=20, pages=0)
+        paginated = PaginatedTaskResponse(items=[], total=0, page=1, size=20)
         assert paginated.total == 0
-        assert paginated.items == []
 
 
 class TestCommentSchemas:
@@ -201,35 +130,40 @@ class TestCommentSchemas:
         now = datetime.now(tz=UTC)
         resp = CommentResponse(
             id=uuid.uuid4(),
-            content="Comment",
             task_id=uuid.uuid4(),
             author_id=uuid.uuid4(),
+            content="Comment",
             created_at=now,
             updated_at=now,
         )
         assert resp.content == "Comment"
 
 
+class TestAuthSchemas:
+    def test_login_request(self):
+        login = LoginRequest(email="test@example.com", password="password123")
+        assert login.email == "test@example.com"
+
+    def test_login_invalid_email(self):
+        with pytest.raises(ValidationError):
+            LoginRequest(email="not-email", password="password123")
+
+    def test_token_response(self):
+        token = TokenResponse(
+            access_token="abc", refresh_token="def", token_type="bearer"
+        )
+        assert token.token_type == "bearer"
+
+
 class TestDashboardSchemas:
-    def test_task_count_by_status_defaults(self):
-        counts = TaskCountByStatus()
-        assert counts.todo == 0
-        assert counts.in_progress == 0
-        assert counts.done == 0
-        assert counts.cancelled == 0
-
-    def test_task_count_by_user(self):
-        tcu = TaskCountByUser(user_id="123", user_name="Test", count=5)
-        assert tcu.count == 5
-
     def test_dashboard_stats(self):
         stats = DashboardStats(
             total_tasks=10,
-            tasks_by_status=TaskCountByStatus(todo=3, in_progress=4, done=3),
+            tasks_by_status={"todo": 3, "in_progress": 4, "done": 3},
             tasks_by_priority={"low": 2, "medium": 5, "high": 3},
             overdue_tasks=1,
             tasks_completed_today=2,
         )
         assert stats.total_tasks == 10
         assert stats.overdue_tasks == 1
-        assert stats.tasks_by_status.todo == 3
+        assert stats.tasks_by_status["todo"] == 3

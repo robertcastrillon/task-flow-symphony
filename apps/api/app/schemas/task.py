@@ -28,7 +28,7 @@ class TaskStatusUpdate(BaseModel):
 
 
 class TaskAssign(BaseModel):
-    assigned_to: uuid.UUID | None = None
+    assigned_to: uuid.UUID | None
 
 
 class TaskResponse(BaseModel):
@@ -36,17 +36,17 @@ class TaskResponse(BaseModel):
 
     id: uuid.UUID
     title: str
-    description: str | None = None
+    description: str | None
     status: TaskStatus
     priority: TaskPriority
-    due_date: datetime | None = None
+    due_date: datetime | None
     created_by: uuid.UUID
-    assigned_to: uuid.UUID | None = None
-    tags: list[str] | None = None
+    assigned_to: uuid.UUID | None
+    tags: list[str] | None
     is_deleted: bool
     created_at: datetime
     updated_at: datetime
-    completed_at: datetime | None = None
+    completed_at: datetime | None
 
 
 class PaginatedTaskResponse(BaseModel):
@@ -54,4 +54,3 @@ class PaginatedTaskResponse(BaseModel):
     total: int
     page: int
     size: int
-    pages: int

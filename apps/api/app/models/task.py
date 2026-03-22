@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -30,21 +30,15 @@ class Task(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(String, nullable=True)
     status: Mapped[TaskStatus] = mapped_column(
-        Enum(TaskStatus), nullable=False, default=TaskStatus.todo, index=True
+        Enum(TaskStatus), nullable=False, default=TaskStatus.todo
     )
     priority: Mapped[TaskPriority] = mapped_column(
-        Enum(TaskPriority), nullable=False, default=TaskPriority.medium, index=True
+        Enum(TaskPriority), nullable=False, default=TaskPriority.medium
     )
     due_date: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
-    )
-    tags: Mapped[list[str] | None] = mapped_column(
-        ARRAY(String(50)), nullable=True, default=list
-    )
-    is_deleted: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=False, index=True
     )
     created_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
@@ -52,6 +46,10 @@ class Task(Base):
     assigned_to: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )
+    tags: Mapped[list[str] | None] = mapped_column(
+        ARRAY(String), nullable=True, default=list
+    )
+    is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -74,7 +72,3 @@ class Task(Base):
     comments: Mapped[list["Comment"]] = relationship(  # noqa: F821
         back_populates="task", cascade="all, delete-orphan"
     )
-
-    def __repr__(self) -> str:
-        title = self.__dict__.get("title", "?")
-        return f"<Task {title}>"
