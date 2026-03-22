@@ -4,7 +4,7 @@ import uuid
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import JSON, String
+from sqlalchemy import JSON, String, TypeDecorator
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
@@ -31,13 +31,30 @@ async_session_test = async_sessionmaker(
     engine_test, class_=AsyncSession, expire_on_commit=False
 )
 
+
+# TypeDecorator so SQLAlchemy properly converts UUID <-> str for SQLite
+class SQLiteUUID(TypeDecorator):
+    impl = String(36)
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return str(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return uuid.UUID(value)
+        return value
+
+
 # Patch PG-specific column types for SQLite compatibility
 for table in Base.metadata.tables.values():
     for column in table.columns:
         if isinstance(column.type, ARRAY):
             column.type = JSON()
         elif isinstance(column.type, UUID):
-            column.type = String(36)
+            column.type = SQLiteUUID()
 
 
 @pytest_asyncio.fixture(autouse=True)
