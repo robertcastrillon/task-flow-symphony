@@ -1,4 +1,3 @@
-import sqlite3
 import uuid
 
 import pytest
@@ -15,8 +14,23 @@ from app.db.session import get_db
 from app.main import app
 from app.models import Comment, Task, User  # noqa: F401 — register models
 
-# Make SQLite accept Python uuid.UUID objects
-sqlite3.register_adapter(uuid.UUID, str)
+
+class SQLiteUUID(TypeDecorator):
+    """Store Python uuid.UUID as a 36-char string in SQLite."""
+
+    impl = String(36)
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return str(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return uuid.UUID(value)
+        return value
+
 
 # In-memory SQLite for fast isolated tests — StaticPool ensures single shared connection
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

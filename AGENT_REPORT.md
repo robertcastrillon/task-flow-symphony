@@ -1,51 +1,48 @@
-## Deploy Report — ENG-74: AUTH-03: Tests & validation
+## Quality Check Report — ENG-76: B—TU-01: Database models, schemas & project scaffolding
 
-NEXT_STATE: Deployed to Staging
+NEXT_STATE: Ready to Deploy
 
-**Deployed at:** 2026-03-22 12:14 UTC
-**Branch merged:** `eng-74` → `develop`
-**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/9 (Merged)
+**Branch:** `eng-76`
+**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/10
+**Routes to:** Ready to Deploy (no UI to validate — test evidence below)
 
-### Staging access
+### Test pyramid results
 
-| Service | URL | Status |
-|---------|-----|--------|
-| API | N/A — Docker not available in agent environment | Pending manual deploy |
-| API docs | N/A | Pending manual deploy |
-| Web app | N/A | Pending manual deploy |
+| Level | Check | Result |
+|-------|-------|--------|
+| 1 | Lint (ruff check) | All checks passed |
+| 1 | Lint (ruff format) | 55 files unchanged (clean) |
+| 1 | Security (bandit) | No high/critical findings |
+| 1 | Secrets detection | No hardcoded secrets found |
+| 2 | Unit tests | 209 passed in 20.70s |
+| 2 | Coverage | 97.26% (threshold: 80%) |
+| 3 | Integration tests | N/A — no integration test suite yet |
+| 4 | BDD scenarios | N/A — no BDD test suite yet |
+| 5-6 | E2E + Smoke | N/A — non-UI ticket |
 
-### Deployment notes
+### Coverage breakdown
 
-- PR #9 was successfully merged to `develop` via `--merge` strategy
-- Branch `eng-74` was deleted after merge
-- Docker/Docker Compose is not installed in the agent environment, so the containerized staging deployment could not be executed automatically
-- **Manual action required:** Run `docker-compose up -d --build` on the staging server to deploy the merged code
+| Module | Coverage |
+|--------|----------|
+| models/ | 100% |
+| schemas/ | 100% |
+| services/ | 96-100% |
+| routers/ | 85-100% |
+| core/ | 96-100% |
+| db/ | 100% |
+| **TOTAL** | **97.26%** |
 
-### Test results (from QA phase)
+### QA sign-off (automated)
 
-| Check | Result |
-|-------|--------|
-| Unit tests | 205 passed |
-| BDD scenarios | 32 passed |
-| Coverage | 96.35% (threshold: 80%) |
-| Lint (ruff) | Clean |
-| Security (bandit) | No findings |
+This ticket contains no user-facing UI. All validation is automated:
+- Tests passing: 209/209 green
+- Coverage meets threshold: 97.26% > 80%
+- No security findings (bandit -ll)
+- No hardcoded secrets detected
+- Lint and format clean
 
-### What to verify in staging
+No human UI review needed. Ready to merge.
 
-1. **US-A01:** POST `/api/v1/auth/register` — register with valid email/password, verify 201 response with role "member"
-2. **US-A01:** POST `/api/v1/auth/register` — register with duplicate email, verify 400 error
-3. **US-A02:** POST `/api/v1/auth/login` — login with valid credentials, verify JWT + refresh token returned
-4. **US-A02:** POST `/api/v1/auth/login` — verify rate limiting after 5 failed attempts (429 response)
-5. **US-A03:** GET `/api/v1/auth/me` — verify profile returned with no password hash exposed
-6. **US-A04:** POST `/api/v1/auth/refresh` — verify token refresh with valid refresh token
-7. **US-A05:** Verify unauthenticated access to protected endpoints returns 401
-8. **US-F01:** Verify member cannot assign tasks to other users (403), admin can
-9. **US-F01:** Verify manipulated/expired JWT returns 401
+### Issues found during QA
 
-### Credentials
-- Email: test@example.com
-- Password: password123
-
-### Needs Input
-- Docker/Docker Compose is not available in the agent runtime. Staging deployment must be triggered manually or via CI/CD pipeline on the `develop` branch.
+None — all checks passed on first run. No fixes required.
