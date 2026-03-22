@@ -1,36 +1,41 @@
-## Quality Check Report — ENG-73: AUTH-02: Implement Backend — Auth Module
+## Agent Report — ENG-74: AUTH-03: Tests & validation
 
-NEXT_STATE: Ready to Deploy
+**Mode:** Implementation
+**Branch:** `eng-74`
+**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/9
 
-**Branch:** `eng-73`
-**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/8
-**Routes to:** Ready to Deploy (no UI to validate — test evidence below)
+### What was implemented
+- Comprehensive BDD test suite covering all 6 user stories (US-A01 through US-F01) with 42+ integration tests
+- Fixed a permission gap in `assign_task` service: members could assign tasks to any user without restriction. Now members can only self-assign; admins can assign freely (per US-F01 acceptance criteria)
+- Added integration tests for user management endpoints (list, get, update) to cover team management scenarios from US-F01
+- Added unit tests for the new permission model in task assignment (member self-assign, member-to-other blocked, admin free assignment)
+- Updated existing unit tests to reflect the corrected permission model
 
-### Test pyramid results
+### Files changed
+- apps/api/app/services/task_service.py
+- apps/api/tests/conftest.py
+- apps/api/tests/test_auth_bdd.py
+- apps/api/tests/test_health.py
+- apps/api/tests/test_main.py
+- apps/api/tests/test_services.py
 
-| Level | Check | Result |
-|-------|-------|--------|
-| 1 | Lint (ruff) | All checks passed, 51 files unchanged |
-| 1 | Security (bandit) | No issues found |
-| 1 | Secrets detection | No hardcoded secrets found |
-| 2 | Unit tests | 171 passed in 12.29s |
-| 2 | Coverage | 93.46% (threshold: 80%) |
-| 3 | Integration tests | Covered via auth router tests (test_auth_router.py) |
-| 4 | BDD scenarios | N/A — no BDD tests defined |
-| 5-6 | E2E + Smoke | N/A — non-UI ticket |
+### Quality results
+| Check | Result |
+|-------|--------|
+| Unit tests | 205 passed |
+| Coverage | 96.35% |
+| Lint | Clean (ruff check + format) |
+| Security | No high/critical findings (bandit) |
 
+### BDD scenario coverage
+| User Story | Scenarios | Status |
+|-----------|-----------|--------|
+| US-A01: Registration | 6 tests | All passing |
+| US-A02: Login | 6 tests | All passing |
+| US-A03: Me profile | 2 tests | All passing |
+| US-A04: Token refresh | 2 tests | All passing |
+| US-A05: Logout | 2 tests | All passing |
+| US-F01: Role authorization | 14 tests | All passing |
 
-### QA sign-off (automated)
-
-This ticket contains no user-facing UI. All validation is automated:
-- Tests passing: 171/171 green
-- Coverage meets threshold: 93.46% > 80%
-- No security findings (bandit clean)
-- No hardcoded secrets
-- Lint and format clean
-
-No human UI review needed. Ready to merge.
-
-
-### Issues found during QA
-None — all tests passed on first run, no fixes needed.
+### Next step
+Quality Check agent will run the full test pyramid and deploy locally.
