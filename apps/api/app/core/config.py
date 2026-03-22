@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+asyncpg://taskflow:taskflow@localhost:5432/taskflow"
 
-    jwt_secret_key: str = "change-me-in-production"
+    jwt_secret_key: str = "change-me-in-production"  # noqa: S105
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 1440  # 24h
     jwt_refresh_token_expire_minutes: int = 10080  # 7 days
