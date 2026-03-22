@@ -23,19 +23,18 @@ class TaskService:
     async def list_tasks(
         db: AsyncSession,
         *,
-        status_filter: str | None = None,
+        status: str | None = None,
         assignee: uuid.UUID | None = None,
         priority: str | None = None,
         tag: str | None = None,
         page: int = 1,
         size: int = 20,
-        **_kwargs,
     ) -> PaginatedTaskResponse:
         """Build query from filters, apply pagination, execute."""
         query = select(Task).where(Task.is_deleted.is_(False))
 
-        if status_filter is not None:
-            query = query.where(Task.status == status_filter)
+        if status is not None:
+            query = query.where(Task.status == status)
         if assignee is not None:
             query = query.where(Task.assigned_to == assignee)
         if priority is not None:
