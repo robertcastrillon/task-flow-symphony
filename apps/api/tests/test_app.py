@@ -12,11 +12,11 @@ def test_app_version():
 
 
 def test_openapi_url():
-    assert app.openapi_url == "/api/openapi.json"
+    assert app.openapi_url == "/api/v1/openapi.json"
 
 
 def test_docs_url():
-    assert app.docs_url == "/api/docs"
+    assert app.docs_url == "/api/v1/docs"
 
 
 def test_cors_middleware_configured():
@@ -26,8 +26,8 @@ def test_cors_middleware_configured():
 
 def test_openapi_schema():
     client = TestClient(app)
-    response = client.get("/api/openapi.json")
+    response = client.get("/api/v1/openapi.json")
     assert response.status_code == 200
     schema = response.json()
     assert schema["info"]["title"] == "TaskFlow API"
-    assert "/api/health" in schema["paths"]
+    assert "/api/v1/health" in schema["paths"]
