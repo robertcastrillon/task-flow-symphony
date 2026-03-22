@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     model_config = {"env_prefix": "TASKFLOW_"}
 
     app_name: str = "TaskFlow API"
+    version: str = "0.1.0"
     debug: bool = False
 
     database_url: str = "postgresql+asyncpg://taskflow:taskflow@localhost:5432/taskflow"
