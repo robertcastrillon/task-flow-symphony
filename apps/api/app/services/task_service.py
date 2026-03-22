@@ -3,7 +3,7 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import String, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.task import Task
@@ -27,6 +27,8 @@ class TaskService:
         assignee: uuid.UUID | None = None,
         priority: str | None = None,
         tag: str | None = None,
+        search: str | None = None,
+        sort_by: str | None = None,
         page: int = 1,
         size: int = 20,
     ) -> PaginatedTaskResponse:
@@ -40,14 +42,21 @@ class TaskService:
         if priority is not None:
             query = query.where(Task.priority == priority)
         if tag is not None:
-            query = query.where(Task.tags.any(tag))
+            query = query.where(cast(Task.tags, String).contains(tag))
+        if search is not None:
+            query = query.where(Task.title.ilike(f"%{search}%"))
 
         count_query = select(func.count()).select_from(query.subquery())
         total = (await db.execute(count_query)).scalar() or 0
 
-        query = (
-            query.offset((page - 1) * size).limit(size).order_by(Task.created_at.desc())
-        )
+        if sort_by == "due_date_asc":
+            query = query.order_by(Task.due_date.asc())
+        elif sort_by == "due_date_desc":
+            query = query.order_by(Task.due_date.desc())
+        else:
+            query = query.order_by(Task.created_at.desc())
+
+        query = query.offset((page - 1) * size).limit(size)
         result = await db.execute(query)
         items = [TaskResponse.model_validate(t) for t in result.scalars().all()]
 
