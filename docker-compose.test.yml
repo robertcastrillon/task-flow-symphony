@@ -1,0 +1,26 @@
+services:
+  db-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: taskflow_test
+      POSTGRES_PASSWORD: taskflow_test
+      POSTGRES_DB: taskflow_test
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskflow_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-test:
+    build:
+      context: ./apps/api
+    environment:
+      TASKFLOW_DATABASE_URL: postgresql+asyncpg://taskflow_test:taskflow_test@db-test:5432/taskflow_test
+      TASKFLOW_DEBUG: "false"
+      TASKFLOW_JWT_SECRET_KEY: test-secret-key
+    depends_on:
+      db-test:
+        condition: service_healthy
+    command: pytest --cov --cov-report=term-missing

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 
+<<<<<<< HEAD
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -28,3 +29,24 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+=======
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.version,
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy", "version": settings.version}
+>>>>>>> origin/eng-88

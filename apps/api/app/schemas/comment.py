@@ -9,6 +9,7 @@ class CommentCreate(BaseModel):
 
 
 class CommentResponse(BaseModel):
+<<<<<<< HEAD
     model_config = {"from_attributes": True}
 
     id: uuid.UUID
@@ -17,3 +18,13 @@ class CommentResponse(BaseModel):
     content: str
     created_at: datetime
     updated_at: datetime
+=======
+    id: uuid.UUID
+    content: str
+    task_id: uuid.UUID
+    author_id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+>>>>>>> origin/eng-88

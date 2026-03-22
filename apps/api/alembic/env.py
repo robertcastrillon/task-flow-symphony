@@ -6,7 +6,11 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from app.core.config import settings
+<<<<<<< HEAD
 from app.db.base import Base
+=======
+from app.db.session import Base
+>>>>>>> origin/eng-88
 from app.models import Comment, Task, User  # noqa: F401
 
 config = context.config

@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: taskflow
       POSTGRES_PASSWORD: taskflow
@@ -22,9 +22,8 @@ services:
       - "8000:8000"
     environment:
       TASKFLOW_DATABASE_URL: postgresql+asyncpg://taskflow:taskflow@db:5432/taskflow
-      TASKFLOW_JWT_SECRET_KEY: dev-secret-change-in-production
       TASKFLOW_DEBUG: "true"
-      TASKFLOW_CORS_ORIGINS: '["http://localhost:5173"]'
+      TASKFLOW_JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev-secret-change-in-production}
     depends_on:
       db:
         condition: service_healthy
@@ -38,10 +37,11 @@ services:
       - "5173:5173"
     environment:
       VITE_API_URL: http://localhost:8000
+    depends_on:
+      - api
     volumes:
       - ./apps/web:/app
       - /app/node_modules
-    command: npm run dev -- --host 0.0.0.0
 
 volumes:
   pgdata:
