@@ -1,20 +1,12 @@
 [project]
 name = "taskflow-api"
 version = "0.1.0"
-<<<<<<< HEAD
 description = "TaskFlow API - Task management for small teams"
-=======
-description = "TaskFlow API - Task management backend"
->>>>>>> origin/eng-88
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
-<<<<<<< HEAD
-    "sqlalchemy[asyncio]>=2.0.36",
-=======
     "sqlalchemy[asyncio]>=2.0.0",
->>>>>>> origin/eng-88
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
     "pydantic[email]>=2.10.0",
@@ -23,16 +15,12 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
     "python-multipart>=0.0.12",
-<<<<<<< HEAD
-=======
     "httpx>=0.28.0",
->>>>>>> origin/eng-88
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=8.3.0",
-<<<<<<< HEAD
     "pytest-asyncio>=0.24.0",
     "pytest-cov>=6.0.0",
     "httpx>=0.28.0",
@@ -47,48 +35,28 @@ include = ["app*"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
-=======
-    "pytest-cov>=6.0.0",
-    "pytest-asyncio>=0.24.0",
-    "ruff>=0.8.0",
-    "httpx>=0.28.0",
-]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-asyncio_mode = "auto"
->>>>>>> origin/eng-88
 
 [tool.ruff]
 target-version = "py312"
 line-length = 88
 
 [tool.ruff.lint]
-<<<<<<< HEAD
-select = ["E", "F", "I", "N", "W", "UP", "B", "SIM"]
-=======
 select = ["E", "F", "I", "N", "W", "UP", "S", "B", "A", "C4", "SIM"]
 ignore = ["S101"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S105", "S106"]
->>>>>>> origin/eng-88
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 
-<<<<<<< HEAD
 [tool.coverage.run]
 source = ["app"]
 omit = ["app/db/session.py", "app/core/config.py"]
 
 [tool.coverage.report]
 fail_under = 80
-=======
-[tool.setuptools.packages.find]
-include = ["app*"]
 
 [build-system]
 requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
->>>>>>> origin/eng-88

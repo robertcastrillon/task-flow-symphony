@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-node_modules/
-dist/
-coverage/
-.env
-.env.local
-*.log
-=======
 # Python
 __pycache__/
 *.pyc
@@ -43,4 +35,7 @@ pgdata/
 htmlcov/
 .coverage
 coverage.xml
->>>>>>> origin/eng-88
+coverage/
+
+# Logs
+*.log
