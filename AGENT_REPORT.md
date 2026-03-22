@@ -1,35 +1,40 @@
-## Quality Check Report — ENG-81: B—CD-02: Implement Backend — Comments & Dashboard Module
+## Agent Report — ENG-82: B—CD-03: Tests & validation
 
-NEXT_STATE: Ready to Deploy
+**Mode:** Implementation
+**Branch:** `eng-82`
+**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/15
 
-**Branch:** `eng-81`
-**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/14
-**Routes to:** Ready to Deploy (no UI to validate — test evidence below)
+### What was implemented
+- Created comprehensive BDD integration test suite (`test_bdd_comments_dashboard.py`) with 22 tests
+- Mapped all acceptance criteria from US-C01 (view comments), US-C02 (add comment), and US-D01 (dashboard stats)
+- Verified chronological ordering of comments, multi-author display, empty state handling
+- Validated comment creation, empty/whitespace rejection, 404 on nonexistent/deleted tasks
+- Tested dashboard metrics: correct counts by status, overdue detection, tasks by user, priority breakdown, deleted task exclusion
+- Verified role-based access (member and admin) and authentication requirements for all endpoints
 
-### Test pyramid results
+### Files changed
+- apps/api/tests/test_bdd_comments_dashboard.py
 
-| Level | Check | Result |
-|-------|-------|--------|
-| 1 | Lint (ruff check + format) | PASS — All checks passed, 57 files unchanged |
-| 1 | Security (bandit) | PASS — No high/critical findings |
-| 1 | Secrets detection | PASS — No hardcoded secrets found |
-| 2 | Unit tests | 245 passed, 1 warning in 31.58s |
-| 2 | Coverage | 97.26% (threshold: 80%) |
-| 3 | Integration tests | N/A — no integration test directory |
-| 4 | BDD scenarios | N/A — no BDD test directory |
-| 5-6 | E2E + Smoke | N/A — non-UI ticket |
+### Quality results
+| Check | Result |
+|-------|--------|
+| Unit tests | 314 passed |
+| Coverage | 97% |
+| Lint | Clean |
+| Security | No high/critical findings |
 
+### BDD Scenario Coverage
+| Scenario | Test |
+|----------|------|
+| US-C01: Ver lista de comentarios | `test_list_comments_ordered_chronologically` |
+| US-C01: Tarea sin comentarios | `test_task_without_comments_returns_empty_list` |
+| US-C02: Agregar comentario exitoso | `test_add_comment_success` |
+| US-C02: Comentario vacío | `test_empty_comment_rejected` |
+| US-C02: Comentar en tarea inexistente | `test_comment_on_nonexistent_task_returns_404` |
+| US-D01: Dashboard métricas correctas | `test_dashboard_shows_correct_metrics` |
+| US-D01: Tareas vencidas | `test_dashboard_shows_overdue_tasks` |
+| US-D01: Tareas por usuario | `test_dashboard_shows_tasks_by_user` |
+| US-D01: Dashboard sin tareas | `test_dashboard_no_tasks_all_zeros` |
 
-### QA sign-off (automated)
-
-This ticket contains no user-facing UI. All validation is automated:
-- Tests passing: 245/245 green
-- Coverage meets threshold: 97.26% (required 80%)
-- No security findings (bandit -ll)
-- No hardcoded secrets detected
-
-No human UI review needed. Ready to merge.
-
-
-### Issues found during QA
-None — all checks passed on first run.
+### Next step
+Quality Check agent will run the full test pyramid and deploy locally.
