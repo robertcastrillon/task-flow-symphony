@@ -1,51 +1,33 @@
-## Deploy Report — ENG-74: AUTH-03: Tests & validation
+## Agent Report — ENG-76: B—TU-01: Database models, schemas & project scaffolding
 
-NEXT_STATE: Deployed to Staging
+**Mode:** Implementation
+**Branch:** `eng-76`
+**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/10
 
-**Deployed at:** 2026-03-22 12:14 UTC
-**Branch merged:** `eng-74` → `develop`
-**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/9 (Merged)
+### What was implemented
+- Fixed SQLite UUID type handling in test conftest using a `TypeDecorator` (`SQLiteUUID`) that properly converts between Python `uuid.UUID` objects and strings — this resolved 15 failing integration tests where get-by-ID operations failed due to UUID/String comparison mismatch
+- Fixed ruff lint (E501 line-too-long) and format issues in `test_main.py` and `test_tasks_router.py`
+- All backend scaffolding components (models, schemas, services, routers, core, middleware) were already implemented from prior work and verified working
+- Integration tests added for tasks, users, comments, and dashboard routers
 
-### Staging access
+### Files changed
+- apps/api/app/services/task_service.py
+- apps/api/tests/conftest.py
+- apps/api/tests/test_comments_router.py
+- apps/api/tests/test_dashboard_router.py
+- apps/api/tests/test_health.py
+- apps/api/tests/test_main.py
+- apps/api/tests/test_tasks_router.py
+- apps/api/tests/test_users_router.py
 
-| Service | URL | Status |
-|---------|-----|--------|
-| API | N/A — Docker not available in agent environment | Pending manual deploy |
-| API docs | N/A | Pending manual deploy |
-| Web app | N/A | Pending manual deploy |
-
-### Deployment notes
-
-- PR #9 was successfully merged to `develop` via `--merge` strategy
-- Branch `eng-74` was deleted after merge
-- Docker/Docker Compose is not installed in the agent environment, so the containerized staging deployment could not be executed automatically
-- **Manual action required:** Run `docker-compose up -d --build` on the staging server to deploy the merged code
-
-### Test results (from QA phase)
-
+### Quality results
 | Check | Result |
 |-------|--------|
-| Unit tests | 205 passed |
-| BDD scenarios | 32 passed |
-| Coverage | 96.35% (threshold: 80%) |
-| Lint (ruff) | Clean |
-| Security (bandit) | No findings |
+| Unit tests | 209 passed |
+| Coverage | 97% |
+| Lint | Clean (ruff check) |
+| Format | Clean (ruff format) |
+| Security | No high/critical findings (bandit) |
 
-### What to verify in staging
-
-1. **US-A01:** POST `/api/v1/auth/register` — register with valid email/password, verify 201 response with role "member"
-2. **US-A01:** POST `/api/v1/auth/register` — register with duplicate email, verify 400 error
-3. **US-A02:** POST `/api/v1/auth/login` — login with valid credentials, verify JWT + refresh token returned
-4. **US-A02:** POST `/api/v1/auth/login` — verify rate limiting after 5 failed attempts (429 response)
-5. **US-A03:** GET `/api/v1/auth/me` — verify profile returned with no password hash exposed
-6. **US-A04:** POST `/api/v1/auth/refresh` — verify token refresh with valid refresh token
-7. **US-A05:** Verify unauthenticated access to protected endpoints returns 401
-8. **US-F01:** Verify member cannot assign tasks to other users (403), admin can
-9. **US-F01:** Verify manipulated/expired JWT returns 401
-
-### Credentials
-- Email: test@example.com
-- Password: password123
-
-### Needs Input
-- Docker/Docker Compose is not available in the agent runtime. Staging deployment must be triggered manually or via CI/CD pipeline on the `develop` branch.
+### Next step
+Quality Check agent will run the full test pyramid and deploy locally.
