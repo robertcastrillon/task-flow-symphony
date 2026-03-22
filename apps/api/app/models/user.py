@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import enum
 import uuid
 from datetime import datetime
@@ -13,23 +12,6 @@ from app.db.base import Base
 class UserRole(enum.StrEnum):
     admin = "admin"
     member = "member"
-=======
-from __future__ import annotations
-
-import uuid
-from datetime import datetime
-from typing import TYPE_CHECKING
-
-from sqlalchemy import Boolean, DateTime, String, func
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.db.session import Base
-
-if TYPE_CHECKING:
-    from app.models.comment import Comment
-    from app.models.task import Task
->>>>>>> origin/eng-88
 
 
 class User(Base):
@@ -41,7 +23,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(
         String(255), unique=True, nullable=False, index=True
     )
-<<<<<<< HEAD
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
@@ -49,20 +30,10 @@ class User(Base):
         Enum(UserRole), nullable=False, default=UserRole.member
     )
     telegram_chat_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-=======
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    role: Mapped[str] = mapped_column(String(20), nullable=False, default="member")
-    telegram_chat_id: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, unique=True
-    )
->>>>>>> origin/eng-88
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-<<<<<<< HEAD
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -79,21 +50,6 @@ class User(Base):
     comments: Mapped[list["Comment"]] = relationship(  # noqa: F821
         back_populates="author"
     )
-=======
-
-    created_tasks: Mapped[list[Task]] = relationship(
-        "Task",
-        back_populates="creator",
-        foreign_keys="Task.created_by",
-    )
-    assigned_tasks: Mapped[list[Task]] = relationship(
-        "Task",
-        back_populates="assignee",
-        foreign_keys="Task.assigned_to",
-    )
-    comments: Mapped[list[Comment]] = relationship("Comment", back_populates="author")
 
     def __repr__(self) -> str:
-        email = self.__dict__.get("email", "?")
-        return f"<User {email}>"
->>>>>>> origin/eng-88
+        return f"<User {self.email}>"
