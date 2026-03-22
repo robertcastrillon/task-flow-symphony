@@ -16,6 +16,7 @@ from app.schemas.task import TaskAssign, TaskCreate, TaskStatusUpdate, TaskUpdat
 from app.schemas.user import UserUpdate
 from app.services.auth_service import AuthService
 from app.services.comment_service import CommentService
+from app.services.dashboard_service import DashboardService
 from app.services.task_service import TaskService
 from app.services.user_service import UserService
 
@@ -494,7 +495,6 @@ class TestCommentServiceCreate:
 # ---------------------------------------------------------------------------
 # DashboardService
 # ---------------------------------------------------------------------------
-from app.services.dashboard_service import DashboardService
 
 
 class TestDashboardService:
