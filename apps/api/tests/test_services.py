@@ -489,3 +489,86 @@ class TestCommentServiceCreate:
         result = await CommentService.create_comment(db, task.id, payload, user)
         assert isinstance(result, Comment)
         db.add.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# DashboardService
+# ---------------------------------------------------------------------------
+from app.services.dashboard_service import DashboardService
+
+
+class TestDashboardService:
+    @pytest.mark.asyncio
+    async def test_get_stats_empty(self):
+        db = AsyncMock()
+
+        # total tasks
+        total_mock = MagicMock()
+        total_mock.scalar.return_value = 0
+
+        # status counts
+        status_mock = MagicMock()
+        status_mock.all.return_value = []
+
+        # priority counts
+        priority_mock = MagicMock()
+        priority_mock.all.return_value = []
+
+        # overdue
+        overdue_mock = MagicMock()
+        overdue_mock.scalar.return_value = 0
+
+        # users
+        user_mock = MagicMock()
+        user_mock.all.return_value = []
+
+        db.execute.side_effect = [
+            total_mock,
+            status_mock,
+            priority_mock,
+            overdue_mock,
+            user_mock,
+        ]
+
+        result = await DashboardService.get_stats(db)
+        assert result.total_tasks == 0
+        assert result.overdue_tasks == 0
+        assert result.tasks_by_status.todo == 0
+        assert result.tasks_by_user == []
+
+    @pytest.mark.asyncio
+    async def test_get_stats_with_data(self):
+        db = AsyncMock()
+        uid = uuid.uuid4()
+
+        total_mock = MagicMock()
+        total_mock.scalar.return_value = 5
+
+        status_mock = MagicMock()
+        status_mock.all.return_value = [("todo", 2), ("in_progress", 3)]
+
+        priority_mock = MagicMock()
+        priority_mock.all.return_value = [("high", 3), ("low", 2)]
+
+        overdue_mock = MagicMock()
+        overdue_mock.scalar.return_value = 1
+
+        user_mock = MagicMock()
+        user_mock.all.return_value = [(uid, "Alice", 3)]
+
+        db.execute.side_effect = [
+            total_mock,
+            status_mock,
+            priority_mock,
+            overdue_mock,
+            user_mock,
+        ]
+
+        result = await DashboardService.get_stats(db)
+        assert result.total_tasks == 5
+        assert result.overdue_tasks == 1
+        assert result.tasks_by_status.todo == 2
+        assert result.tasks_by_status.in_progress == 3
+        assert result.tasks_by_priority == {"high": 3, "low": 2}
+        assert len(result.tasks_by_user) == 1
+        assert result.tasks_by_user[0].user_name == "Alice"
