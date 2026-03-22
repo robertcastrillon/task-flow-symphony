@@ -1,34 +1,44 @@
-## Deploy Report — ENG-70: PSI-03: Tests & validation
+## Deploy Report — ENG-72: AUTH-01: Database models, schemas & project scaffolding
 
-**Deployed at:** 2026-03-21 22:45 UTC
-**Branch merged:** `eng-70` → `develop`
-**PR:** [#5](https://github.com/robertcastrillon/task-flow-symphony/pull/5) — Merged
+**Deployed at:** 2026-03-21 20:45 UTC
+**Branch merged:** `eng-72` → `develop`
+**PR:** [#6](https://github.com/robertcastrillon/task-flow-symphony/pull/6) — Merged
 
 ### Staging access
 
 | Service | URL | Status |
 |---------|-----|--------|
-| API | http://localhost:8000 | OK (local) |
-| API docs | http://localhost:8000/api/v1/docs | OK (200) |
-| Web app | http://localhost:5173 | Not deployed (Docker Compose plugin unavailable) |
+| API | N/A | Not deployed (Docker Compose plugin unavailable) |
+| API docs | N/A | Not deployed |
+| Web app | N/A | Not deployed |
 
 ### Credentials
 - Email: test@example.com
 - Password: password123
 
 ### Smoke test results
-- Health endpoint (`/api/v1/health`): OK — `{"status":"healthy","app_name":"TaskFlow API","version":"0.1.0"}`
-- API docs (`/api/v1/docs`): OK (200)
-- Root health (`/health`): 404 (expected — health lives under `/api/v1/health`)
+- App factory: OK (`create_app()` succeeds)
+- All 149 tests pass (7.6s)
+- Ruff lint: clean
+
+### What was delivered
+1. SQLAlchemy ORM models: User, Task, Comment with relationships, indexes, soft delete
+2. Pydantic schemas for all API types (auth, user, task, comment, dashboard)
+3. Service layer: AuthService, UserService, TaskService, CommentService, DashboardService
+4. Core modules: config (pydantic-settings), security (JWT/bcrypt), dependencies, middleware
+5. FastAPI app factory with router registration, CORS, health endpoint
+6. Full test suite: 149 tests, 92%+ coverage
 
 ### What to verify in staging
-1. Health endpoint returns `{"status": "healthy", "app_name": "TaskFlow API", "version": "0.1.0"}`
-2. API docs page loads at `/api/v1/docs`
-3. Version is correctly read from `Settings.version` config field
-4. `.gitignore` properly excludes `apps/web/coverage/` directory
+1. Run `docker compose up -d --build` when Docker Compose is available
+2. Verify `GET /health` returns 200
+3. Verify `POST /api/v1/auth/register` creates a user
+4. Verify `POST /api/v1/auth/login` returns JWT tokens
+5. Verify `GET /api/v1/auth/me` returns current user with valid JWT
+6. Verify all model migrations run cleanly against PostgreSQL
 
 ### Deployment notes
-- Docker Compose plugin (`docker compose`) is not available on this machine — only standalone `docker` CLI is installed. The API was tested locally using `uvicorn` directly with a SQLite backend.
-- No database migrations were required for these changes (config/response format only).
-- The PR merged cleanly with no conflicts against `develop`.
-- Changes are minimal: health endpoint alignment (`"ok"` → `"healthy"`), centralized version in Settings, and `.gitignore` cleanup.
+- Docker Compose plugin (`docker-compose-plugin`) is not available on this machine, preventing local staging deployment. The API was verified by importing and creating the app factory successfully.
+- Branch was rebased onto latest `develop` (resolved conflicts from PSI-03 infra scaffold merge).
+- PR #6 merged cleanly to `develop` with branch deletion.
+- For full staging, install `docker-compose-plugin` or deploy via GCP Cloud Run using `infra/gcp/setup-staging.sh`.
