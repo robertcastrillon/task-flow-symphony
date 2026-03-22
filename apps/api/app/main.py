@@ -7,7 +7,7 @@ from app.core.config import settings
 def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
-        version="0.1.0",
+        version=settings.version,
         docs_url="/api/v1/docs",
         openapi_url="/api/v1/openapi.json",
     )
@@ -22,7 +22,11 @@ def create_app() -> FastAPI:
 
     @app.get("/api/v1/health")
     async def health_check() -> dict[str, str]:
-        return {"status": "ok"}
+        return {
+            "status": "healthy",
+            "app_name": settings.app_name,
+            "version": settings.version,
+        }
 
     return app
 
