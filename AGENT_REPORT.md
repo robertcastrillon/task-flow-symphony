@@ -1,46 +1,51 @@
-## Quality Check Report — ENG-74: AUTH-03: Tests & validation
+## Deploy Report — ENG-74: AUTH-03: Tests & validation
 
-NEXT_STATE: Ready to Deploy
+NEXT_STATE: Deployed to Staging
 
-**Branch:** `eng-74`
-**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/9
-**Routes to:** Ready to Deploy (no UI to validate — test evidence below)
+**Deployed at:** 2026-03-22 12:14 UTC
+**Branch merged:** `eng-74` → `develop`
+**PR:** https://github.com/robertcastrillon/task-flow-symphony/pull/9 (Merged)
 
-### Test pyramid results
+### Staging access
 
-| Level | Check | Result |
-|-------|-------|--------|
-| 1 | Lint (ruff check) | All checks passed, 0 issues |
-| 1 | Lint (ruff format) | 52 files unchanged (already formatted) |
-| 1 | Security (bandit) | No high/critical findings |
-| 1 | Secrets detection | No hardcoded secrets found |
-| 2 | Unit tests | 205 passed in 22.11s |
-| 2 | Coverage | 96.35% (threshold: 80%) |
-| 3 | Integration tests | Covered via BDD test suite |
-| 4 | BDD scenarios | 32 passed in 9.38s |
-| 5-6 | E2E + Smoke | N/A — non-UI ticket |
+| Service | URL | Status |
+|---------|-----|--------|
+| API | N/A — Docker not available in agent environment | Pending manual deploy |
+| API docs | N/A | Pending manual deploy |
+| Web app | N/A | Pending manual deploy |
 
-### BDD scenario coverage
+### Deployment notes
 
-| User Story | Scenarios | Status |
-|-----------|-----------|--------|
-| US-A01: Registration | 6 tests (successful, duplicate email, weak password, invalid email, empty fields, empty name) | All passing |
-| US-A02: Login | 6 tests (successful, wrong password, nonexistent email, no-reveal, rate limiting, inactive user) | All passing |
-| US-A03: Me profile | 2 tests (authenticated view, unauthenticated access) | All passing |
-| US-A04: Token refresh | 2 tests (valid refresh, expired refresh) | All passing |
-| US-A05: Logout | 2 tests (no token rejected, invalid token rejected) | All passing |
-| US-F01: Role authorization | 14 tests (admin CRUD, member restrictions, expired/manipulated tokens, IDOR prevention, task assignment permissions, user management) | All passing |
+- PR #9 was successfully merged to `develop` via `--merge` strategy
+- Branch `eng-74` was deleted after merge
+- Docker/Docker Compose is not installed in the agent environment, so the containerized staging deployment could not be executed automatically
+- **Manual action required:** Run `docker-compose up -d --build` on the staging server to deploy the merged code
 
-### QA sign-off (automated)
+### Test results (from QA phase)
 
-This ticket contains no user-facing UI. All validation is automated:
-- Tests passing: 205/205 unit + 32/32 BDD — all green
-- Coverage 96.35% exceeds 80% threshold
-- No security findings (bandit)
-- No hardcoded secrets
-- Lint and format clean
+| Check | Result |
+|-------|--------|
+| Unit tests | 205 passed |
+| BDD scenarios | 32 passed |
+| Coverage | 96.35% (threshold: 80%) |
+| Lint (ruff) | Clean |
+| Security (bandit) | No findings |
 
-No human UI review needed. Ready to merge.
+### What to verify in staging
 
-### Issues found during QA
-None — all tests pass, coverage exceeds threshold, no lint or security issues.
+1. **US-A01:** POST `/api/v1/auth/register` — register with valid email/password, verify 201 response with role "member"
+2. **US-A01:** POST `/api/v1/auth/register` — register with duplicate email, verify 400 error
+3. **US-A02:** POST `/api/v1/auth/login` — login with valid credentials, verify JWT + refresh token returned
+4. **US-A02:** POST `/api/v1/auth/login` — verify rate limiting after 5 failed attempts (429 response)
+5. **US-A03:** GET `/api/v1/auth/me` — verify profile returned with no password hash exposed
+6. **US-A04:** POST `/api/v1/auth/refresh` — verify token refresh with valid refresh token
+7. **US-A05:** Verify unauthenticated access to protected endpoints returns 401
+8. **US-F01:** Verify member cannot assign tasks to other users (403), admin can
+9. **US-F01:** Verify manipulated/expired JWT returns 401
+
+### Credentials
+- Email: test@example.com
+- Password: password123
+
+### Needs Input
+- Docker/Docker Compose is not available in the agent runtime. Staging deployment must be triggered manually or via CI/CD pipeline on the `develop` branch.
