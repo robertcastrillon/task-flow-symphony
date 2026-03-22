@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     app_name: str = "TaskFlow API"
     version: str = "0.1.0"
     debug: bool = False
+    version: str = "0.1.0"
 
     database_url: str = "postgresql+asyncpg://taskflow:taskflow@localhost:5432/taskflow"
 
