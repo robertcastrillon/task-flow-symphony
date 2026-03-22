@@ -6,6 +6,8 @@ async def test_health_check(client):
     response = await client.get("/api/v1/health")
     assert response.status_code == 200
     data = response.json()
-    assert data["status"] == "healthy"
-    assert data["app_name"] == "TaskFlow API"
-    assert data["version"] == "0.1.0"
+    assert data == {
+        "status": "healthy",
+        "app_name": "TaskFlow API",
+        "version": "0.1.0",
+    }

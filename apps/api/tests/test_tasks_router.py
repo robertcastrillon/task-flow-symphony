@@ -108,9 +108,7 @@ class TestListTasks:
     async def test_list_tasks_filter_by_status(self, client, db_session):
         user = await _create_user(db_session)
         await _create_task(db_session, user.id, title="Todo", status="todo")
-        await _create_task(
-            db_session, user.id, title="Done", status="done"
-        )
+        await _create_task(db_session, user.id, title="Done", status="done")
         response = await client.get(
             "/api/v1/tasks?status=todo", headers=_auth_header(user)
         )
@@ -220,7 +218,9 @@ class TestChangeStatus:
         assert data["completed_at"] is not None
 
     @pytest.mark.asyncio
-    async def test_change_status_from_done_clears_completed_at(self, client, db_session):
+    async def test_change_status_from_done_clears_completed_at(
+        self, client, db_session
+    ):
         user = await _create_user(db_session)
         task = await _create_task(db_session, user.id)
         # First set to done

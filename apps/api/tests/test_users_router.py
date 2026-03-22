@@ -45,9 +45,7 @@ class TestListUsers:
     @pytest.mark.asyncio
     async def test_list_users_excludes_inactive(self, client, db_session):
         active = await _create_user(db_session, email="active@example.com")
-        await _create_user(
-            db_session, email="inactive@example.com", is_active=False
-        )
+        await _create_user(db_session, email="inactive@example.com", is_active=False)
         response = await client.get("/api/v1/users", headers=_auth_header(active))
         assert response.status_code == 200
         emails = [u["email"] for u in response.json()]
@@ -107,9 +105,7 @@ class TestUpdateUser:
 
     @pytest.mark.asyncio
     async def test_admin_can_update_other_profile(self, client, db_session):
-        admin = await _create_user(
-            db_session, email="admin@example.com", role="admin"
-        )
+        admin = await _create_user(db_session, email="admin@example.com", role="admin")
         member = await _create_user(db_session, email="member@example.com")
         response = await client.patch(
             f"/api/v1/users/{member.id}",
